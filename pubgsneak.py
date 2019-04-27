@@ -8,7 +8,6 @@ import requests
 import re
 import time
 
-pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
 class pubgPlayer:
 
@@ -91,28 +90,27 @@ class pubgPlayer:
 	def rank_points(self, game_mode):
 		return int(self.season_stats[game_mode]['rankPoints'])
 
+
 def sneak_player(pubg_player):
 	
 	p = pubgPlayer(pubg_player, pubg_season, pubg_api_key)
 	
-	if p.player_name_to_accountid():
-		if p.get_season_stats():
+	if p.player_name_to_accountid() and p.get_season_stats():
+		for game_mode in p.game_modes():
 			
-			for game_mode in p.game_modes():
-				
-				if p.has_games_played_in_game_mode(game_mode):
-					r_game_mode = p.format_game_mode(game_mode)
+			if p.has_games_played_in_game_mode(game_mode):
+				r_game_mode = p.format_game_mode(game_mode)
 
-					rank = p.rank_points(game_mode)
-					games = p.rounds_played(game_mode)
-					kd = p.kill_death_ratio(game_mode)
-					avgdmg = p.average_damage(game_mode)
-					headshot = f'{p.head_shot_ratio(game_mode)}%'
-					mostkills = p.round_most_kills(game_mode)
-					win = f'{p.win_ratio(game_mode)}%'
-					
-					if p.has_games_played_in_season():
-						print(f'\t[{rank} {r_game_mode}] with {kd} KD @ {avgdmg} DMG in {games} games. {headshot} HS / {win} WIN / Most Kills: {mostkills}')
+				rank = p.rank_points(game_mode)
+				games = p.rounds_played(game_mode)
+				kd = p.kill_death_ratio(game_mode)
+				avgdmg = p.average_damage(game_mode)
+				headshot = f'{p.head_shot_ratio(game_mode)}%'
+				mostkills = p.round_most_kills(game_mode)
+				win = f'{p.win_ratio(game_mode)}%'
+				
+				if p.has_games_played_in_season():
+					print(f'\t[{rank} {r_game_mode}] with {kd} KD @ {avgdmg} DMG in {games} games. {headshot} HS / {win} WIN / Most Kills: {mostkills}')
 
 def main():
 	processed_files = [f for f in os.listdir(pubg_screenshots) if os.path.isfile(os.path.join(pubg_screenshots, f))]
@@ -140,27 +138,33 @@ def main():
 
 				playerbox_string = pytesseract.image_to_string(image_playerbox_resized, config='--psm 6 --oem 3')
 
-				for pl in playerbox_string.split():
-					if re.match('^[a-zA-Z0-9_]{4,15}$', pl) is not None:
-						players.append(pl)
+				for player in playerbox_string.split():
+					if re.match('^[a-zA-Z0-9_]{4,15}$', player) is not None:
+						players.append(player)
 
 			if click.confirm(f'Sneak {file} - Team size: {len(players)} - {players}?', default=True):
 				for player in players:
 					if player not in ignored_players:
 						print(f'\n>> {player}')
 						sneak_player(player)
+						time.sleep(1)
 			
 			processed_files.append(file)
 			print('\n--- END OF SNEAK ---\n')
 
 		time.sleep(5)
 
+
 if __name__ == '__main__':
 	cf = configparser.ConfigParser()
 	cf.read('config.ini')
-	pubg_screenshots = cf.get('general', 'pubg_screenshots')
-	pubg_api_key = cf.get('general', 'pubg_api_key')
-	pubg_season = cf.get('general', 'pubg_season')
+
+	pytesseract.pytesseract.tesseract_cmd = cf.get('paths', 'tesseractbin')
+	pubg_screenshots = cf.get('paths', 'pubg_screenshots')
+
+	pubg_api_key = cf.get('api', 'pubg_api_key')
+	pubg_season = cf.get('api', 'pubg_season')
+	
 	ignored_players = cf.get('general', 'ignored_players').split()
 	
 	main()

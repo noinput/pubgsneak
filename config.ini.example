@@ -1,5 +1,10 @@
-[general]
-pubg_screenshots=C:\\Program Files (x86)\\Steam\\userdata\\00000000\\000\\remote\\578080\\screenshots
+[api]
 pubg_season=division.bro.official.pc-2018-03
-pubg_api_key=xxxxxxxx
-ignored_players=player1 player2 player3 player4 player5
+pubg_api_key=xxxxxx
+
+[paths]
+tesseractbin=C:\Program Files\Tesseract-OCR\tesseract.exe
+pubg_screenshots=C:\Program Files (x86)\Steam\userdata\00000000\000\remote\578080\screenshots
+
+[general]
+ignored_players=Player1 Player2 Player3 Player4 Player5 Player6
