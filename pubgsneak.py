@@ -139,7 +139,7 @@ def main():
 				playerbox_string = pytesseract.image_to_string(image_playerbox_resized, config='--psm 6 --oem 3')
 
 				for player in playerbox_string.split():
-					if re.match('^[a-zA-Z0-9_]{4,15}$', player) is not None:
+					if re.match('^[a-zA-Z0-9_]{4,25}$', player) is not None:
 						players.append(player)
 
 			if click.confirm(f'Sneak {file} - Team size: {len(players)} - {players}?', default=True):
